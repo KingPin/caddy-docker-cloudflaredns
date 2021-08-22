@@ -62,3 +62,9 @@ jobs:
             ghcr.io/kingpin/caddy-docker-cloudflaredns:latest
             kingpin/caddy-docker-cloudflaredns:latest
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: update-container-description-action
+        uses: christian-korneck/update-container-description-action@v1
+        with:
+          destination_container_repo: kingpin/caddy-docker-cloudflaredns
+          provider: dockerhub
