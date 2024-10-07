@@ -20,7 +20,7 @@ jobs:
         run: env | sort
       - 
         name: Checkout source
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.1
         with:
           repository: ${{ github.repository }}
           token: ${{ github.token }}
