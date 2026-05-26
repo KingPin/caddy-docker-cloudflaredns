@@ -22,19 +22,16 @@ The image ships a `HEALTHCHECK` that probes Caddy's admin API on `127.0.0.1:2019
          -v ./caddy_data:/data \
          -v ./caddy_config:/config \
          -v ./Caddyfile:/etc/caddy/Caddyfile \
-         -e CLOUDFLARE_EMAIL=you@cloudflare.email.com \
          -e CLOUDFLARE_API_TOKEN=iHFh938nf93r39jsSnS4Q5zw04q0EsRG7xmalB \
          kingpin/caddy-docker-cloudflaredns
 
 **Docker-compose.yml**
 
-    version: "3.7"
     services:
       caddy:
         image: ghcr.io/kingpin/caddy-docker-cloudflaredns:latest
         container_name: caddy
         environment:
-          - CLOUDFLARE_EMAIL=your@cloudflare.email
           - CLOUDFLARE_API_TOKEN=iHFh938nf93r39jsSnS4Q5zw04q0EsRG7xmalB
         ports:
           - 80:80
@@ -55,3 +52,34 @@ edit your Caddyfile with this at the top :
     { 
         acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN} 
     }
+
+## Using the docker-proxy plugin
+
+This image also bundles [`caddy-docker-proxy`](https://github.com/lucaslorentz/caddy-docker-proxy), which builds the Caddyfile from labels on your other containers — Caddy reconfigures itself automatically as you start and stop services, so you don't have to maintain a Caddyfile by hand.
+
+To use it, run Caddy with the `docker-proxy` command and give it read access to the Docker socket:
+
+    services:
+      caddy:
+        image: ghcr.io/kingpin/caddy-docker-cloudflaredns:latest
+        container_name: caddy
+        command: caddy docker-proxy
+        ports:
+          - 80:80
+          - 443:443
+        environment:
+          - CLOUDFLARE_API_TOKEN=iHFh938nf93r39jsSnS4Q5zw04q0EsRG7xmalB
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock:ro
+          - ./caddy_data:/data
+          - ./caddy_config:/config
+        restart: unless-stopped
+
+      whoami:
+        image: traefik/whoami
+        labels:
+          caddy: whoami.example.com
+          caddy.reverse_proxy: "{{upstreams 80}}"
+          caddy.tls.dns: cloudflare {env.CLOUDFLARE_API_TOKEN}
+
+With this setup, any container you label with `caddy: <hostname>` is published by Caddy automatically, and the `caddy.tls.dns` label drives DNS-01 certificates through Cloudflare. See the [caddy-docker-proxy docs](https://github.com/lucaslorentz/caddy-docker-proxy) for the full label syntax.
