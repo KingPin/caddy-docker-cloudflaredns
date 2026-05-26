@@ -68,8 +68,19 @@ jobs:
           docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:test caddy version
           docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:test caddy build-info
           docker run --rm ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:test caddy list-modules
-      - 
-        name: Run Trivy vulnerability scanner
+      -
+        name: Trivy gate (fail on fixable CRITICAL)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: image
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:test
+          severity: 'CRITICAL'
+          ignore-unfixed: true
+          exit-code: '1'
+          hide-progress: false
+      -
+        name: Trivy report (SARIF for Security tab)
+        if: always()
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: image
@@ -79,8 +90,9 @@ jobs:
           output: 'trivy-results.sarif'
           severity: 'MEDIUM,CRITICAL,HIGH'
           hide-progress: false
-      - 
+      -
         name: Upload Trivy scan results to GitHub Security tab
+        if: always()
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: 'trivy-results.sarif'

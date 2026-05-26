@@ -1,8 +1,18 @@
 
 # caddy-docker-cloudflaredns
-Caddy webserver v2 in a docker with cloudflaredns plugin enabled. 
-The docker containers are built for amd64 & arm64 / aarch64. 
-Its available both at docker under *kingpin/caddy-docker-cloudflaredns:latest* & *ghcr.io/kingpin/caddy-docker-cloudflaredns:latest*
+Caddy webserver v2 in a docker with the following plugins built in:
+
+- [`caddy-dns/cloudflare`](https://github.com/caddy-dns/cloudflare) — Cloudflare DNS provider for ACME DNS-01 challenges.
+- [`lucaslorentz/caddy-docker-proxy`](https://github.com/lucaslorentz/caddy-docker-proxy) — generates the Caddyfile from labels on other Docker containers, so Caddy auto-configures itself as you start/stop services.
+
+The docker containers are built for amd64, arm64 / aarch64, and arm/v7.
+Available at:
+
+- `kingpin/caddy-docker-cloudflaredns:latest` (Docker Hub)
+- `ghcr.io/kingpin/caddy-docker-cloudflaredns:latest` (GHCR)
+- `quay.io/kingpinx1/caddy-docker-cloudflaredns:latest` (Quay)
+
+The image ships a `HEALTHCHECK` that probes Caddy's admin API on `127.0.0.1:2019`. If you set `admin off` in your Caddyfile, run with `--no-healthcheck` or override `HEALTHCHECK` in your own image.
 
 **docker run** : 
 
