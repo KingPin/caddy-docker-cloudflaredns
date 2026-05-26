@@ -26,7 +26,7 @@ jobs:
           token: ${{ github.token }}
       -
         name: Docker Setup QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         id: qemu
         with:
           platforms: amd64,arm64,arm
